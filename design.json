@@ -1,0 +1,405 @@
+{
+  "designSystem": {
+    "meta": {
+      "name": "Timeline-Learning-UI",
+      "version": "1.0.0",
+      "description": "타임라인 중심(트랜스크립트 동기화) 학습 UI를 정밀 복제 가능한 시각 사양으로 정의한 JSON",
+      "theme": "light"
+    },
+    "tokens": {
+      "colors": {
+        "base": {
+          "pageBgFrom": "#F8FAFC",
+          "pageBgTo": "#EEF2F7",
+          "surface": "#FFFFFF",
+          "surfaceMuted": "#FAFAFB",
+          "overlay": "rgba(17, 24, 39, 0.55)",
+          "border": "#E5E7EB",
+          "divider": "#EEF2F7",
+          "shadow": "rgba(16, 24, 40, 0.08)"
+        },
+        "text": {
+          "primary": "#111827",
+          "secondary": "#6B7280",
+          "tertiary": "#9CA3AF",
+          "inverse": "#FFFFFF",
+          "link": "#2563EB",
+          "linkHover": "#1D4ED8"
+        },
+        "brand": {
+          "primary": "#2563EB",
+          "primaryHover": "#1D4ED8",
+          "primaryActive": "#1E40AF",
+          "accent": "#6366F1"
+        },
+        "states": {
+          "success": "#16A34A",
+          "warning": "#D97706",
+          "danger": "#DC2626",
+          "focusRing": "#93C5FD",
+          "selectedBg": "#E0E7FF",
+            "selectedBorder": "#6366F1",
+          "hoverBg": "#F8FAFF"
+        },
+        "timeline": {
+          "track": "#E5E7EB",
+          "buffered": "#CBD5E1",
+          "played": "#2563EB",
+          "chapterMarker": "#64748B",
+          "scrubber": "#2563EB"
+        },
+        "chip": {
+          "bg": "#F1F5F9",
+          "text": "#0F172A",
+          "border": "#E2E8F0",
+          "selectedBg": "#DBEAFE",
+          "selectedText": "#1E3A8A",
+          "selectedBorder": "#93C5FD"
+        },
+        "list": {
+          "rowBgActive": "#EEF2FF",
+          "rowBorderActive": "#6366F1",
+          "timestamp": "#334155"
+        },
+        "tooltip": {
+          "bg": "#111827",
+          "text": "#FFFFFF"
+        }
+      },
+      "typography": {
+        "fontFamily": "Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans KR', Arial, sans-serif",
+        "scale": {
+          "h1": {"size": "24px", "lineHeight": "32px", "weight": 700},
+          "h2": {"size": "18px", "lineHeight": "28px", "weight": 600},
+          "body": {"size": "14px", "lineHeight": "22px", "weight": 400},
+          "label": {"size": "12px", "lineHeight": "16px", "weight": 600},
+          "mono": {"family": "ui-monospace, SFMono-Regular, Menlo, monospace", "size": "12px", "lineHeight": "16px"}
+        }
+      },
+      "radius": {
+        "xs": "6px",
+        "sm": "10px",
+        "md": "14px",
+        "lg": "18px",
+        "pill": "999px"
+      },
+      "elevation": {
+        "panel": "0 2px 12px rgba(16, 24, 40, 0.08)",
+        "popover": "0 8px 24px rgba(16, 24, 40, 0.12)",
+        "focusRing": "0 0 0 3px rgba(147, 197, 253, 0.9)"
+      },
+      "spacing": {
+        "xs": "4px",
+        "sm": "8px",
+        "md": "12px",
+        "lg": "16px",
+        "xl": "24px",
+        "xxl": "32px"
+      },
+      "motion": {
+        "duration": {
+          "fast": "120ms",
+          "base": "180ms",
+          "slow": "280ms"
+        },
+        "easing": {
+          "inOut": "cubic-bezier(0.4, 0, 0.2, 1)"
+        }
+      },
+      "zIndex": {
+        "header": 10,
+        "scrubber": 20,
+        "popover": 30,
+        "tooltip": 40,
+        "overlay": 50
+      }
+    },
+    "componentStyles": {
+      "appShell": {
+        "pageBackground": "linear-gradient(180deg, #F8FAFC 0%, #EEF2F7 100%)",
+        "containerMaxWidth": "1200px",
+        "padding": "24px"
+      },
+      "playerPanel": {
+        "container": {
+          "surfaceColor": "#FFFFFF",
+          "border": "#E5E7EB",
+          "radius": "14px",
+          "shadow": "0 2px 12px rgba(16,24,40,0.08)",
+          "padding": "12px"
+        },
+        "iframe": {
+          "aspectRatio": "16/9",
+          "radius": "10px",
+          "border": "1px solid #E5E7EB"
+        },
+        "chapterBar": {
+          "height": "8px",
+          "radius": "pill",
+          "trackColor": "#E5E7EB",
+          "bufferedColor": "#CBD5E1",
+          "playedColor": "#2563EB",
+          "markers": {
+            "width": "2px",
+            "color": "#64748B",
+            "radius": "2px",
+            "opacity": 0.9,
+            "labelStyle": {
+              "font": "label",
+              "color": "#334155",
+              "bg": "#FFFFFF",
+              "border": "#E5E7EB",
+              "radius": "6px",
+              "shadow": "0 2px 8px rgba(16,24,40,0.08)"
+            }
+          },
+          "scrubber": {
+            "diameter": "14px",
+            "color": "#2563EB",
+            "border": "2px solid #FFFFFF",
+            "shadow": "0 2px 8px rgba(16,24,40,0.18)"
+          }
+        }
+      },
+      "keywordChips": {
+        "container": {
+          "surfaceColor": "transparent",
+          "gap": "8px",
+          "wrap": true
+        },
+        "chip": {
+          "bg": "#F1F5F9",
+          "text": "#0F172A",
+          "border": "1px solid #E2E8F0",
+          "radius": "999px",
+          "paddingX": "10px",
+          "paddingY": "6px",
+          "iconColor": "#495057",
+          "states": {
+            "hover": {"bg": "#EEF2F7", "border": "1px solid #CBD5E1"},
+            "selected": {"bg": "#DBEAFE", "text": "#1E3A8A", "border": "1px solid #93C5FD"},
+            "focus": {"ring": "0 0 0 3px rgba(147, 197, 253, 0.9)"},
+            "disabled": {"bg": "#F8FAFC", "text": "#9CA3AF", "border": "1px solid #E5E7EB", "opacity": 0.6}
+          }
+        }
+      },
+      "transcriptPanel": {
+        "container": {
+          "surfaceColor": "#FFFFFF",
+          "border": "#E5E7EB",
+          "radius": "14px",
+          "shadow": "0 2px 12px rgba(16,24,40,0.08)",
+          "padding": "12px"
+        },
+        "header": {
+          "titleColor": "#111827",
+          "subtitleColor": "#6B7280"
+        },
+        "search": {
+          "bg": "#FAFAFB",
+          "text": "#111827",
+          "placeholder": "#9CA3AF",
+          "border": "1px solid #E5E7EB",
+          "radius": "10px",
+          "iconColor": "#6B7280",
+          "focusRing": "0 0 0 3px rgba(147, 197, 253, 0.9)"
+        },
+        "row": {
+          "height": "auto",
+          "paddingY": "10px",
+          "paddingX": "12px",
+          "radius": "10px",
+          "gap": "10px",
+          "timestamp": {
+            "font": "mono",
+            "color": "#334155",
+            "bg": "#F1F5F9",
+            "border": "1px solid #E2E8F0",
+            "radius": "8px",
+            "paddingX": "8px",
+            "paddingY": "4px"
+          },
+          "textZh": {"color": "#111827"},
+          "textPinyin": {"color": "#6B7280"},
+          "textKo": {"color": "#374151"},
+          "badges": {
+            "grammar": {"bg": "#EEF2FF", "text": "#3730A3", "border": "1px solid #C7D2FE", "radius": "6px", "padding": "2px 6px"},
+            "vocab": {"bg": "#E0F2FE", "text": "#075985", "border": "1px solid #BAE6FD", "radius": "6px", "padding": "2px 6px"}
+          },
+          "states": {
+            "hover": {"bg": "#F8FAFF"},
+            "active": {"bg": "#EEF2FF", "borderLeft": "3px solid #6366F1"},
+            "selected": {"bg": "#E0E7FF", "borderLeft": "3px solid #6366F1"},
+            "focus": {"ring": "0 0 0 3px rgba(147, 197, 253, 0.9)"},
+            "disabled": {"opacity": 0.6}
+          },
+          "disclosure": {
+            "chevronColor": "#6B7280",
+            "contentBg": "#FAFAFB",
+            "contentBorder": "1px solid #E5E7EB",
+            "contentRadius": "10px",
+            "contentPadding": "10px"
+          }
+        }
+      },
+      "controls": {
+        "primaryButton": {
+          "surfaceColor": "#2563EB",
+          "textColor": "#FFFFFF",
+          "radius": "10px",
+          "paddingX": "12px",
+          "paddingY": "8px",
+          "shadow": "0 2px 8px rgba(37,99,235,0.35)",
+          "states": {
+            "hoverSurface": "#1D4ED8",
+            "activeSurface": "#1E40AF",
+            "focusRing": "0 0 0 3px rgba(147, 197, 253, 0.9)",
+            "disabledSurface": "#93C5FD",
+            "disabledText": "#FFFFFF"
+          }
+        },
+        "utilityButton": {
+          "surfaceColor": "#FFFFFF",
+          "textColor": "#111827",
+          "border": "1px solid #E5E7EB",
+          "radius": "10px",
+          "states": {
+            "hoverSurface": "#F8FAFF",
+            "activeSurface": "#EEF2F7",
+            "focusRing": "0 0 0 3px rgba(147,197,253,0.9)",
+            "disabledText": "#9CA3AF"
+          }
+        },
+        "toggle": {
+          "trackOff": "#E5E7EB",
+          "trackOn": "#93C5FD",
+          "thumb": "#FFFFFF",
+          "focusRing": "0 0 0 3px rgba(147,197,253,0.9)"
+        }
+      },
+      "tooltip": {
+        "surfaceColor": "#111827",
+        "textColor": "#FFFFFF",
+        "radius": "8px",
+        "padding": "6px 8px",
+        "shadow": "0 8px 24px rgba(16,24,40,0.12)"
+      }
+    },
+    "contextualRules": {
+      "componentSpecific": [
+        "플레이어 패널과 트랜스크립트 패널은 표면색 #FFFFFF, 동일한 경계선 #E5E7EB, 동일한 그림자 강도(패널)로 통일한다.",
+        "챕터 바는 그라데이션을 사용하지 않고 단색 트랙/플레이드/버퍼 색으로만 표현한다.",
+        "Call-to-action(예: '현재 문장 북마크')는 primaryButton 스타일을 사용하고, 보조 액션은 utilityButton을 사용한다.",
+        "키워드 칩은 선택 상태에서만 브랜드 톤(#DBEAFE/#93C5FD)으로 강조하고, 기본은 중성 계열(#F1F5F9)이다."
+      ],
+      "hierarchy": [
+        "appShell > playerPanel > chapterBar > scrubber 순으로 상위-하위 스타일 상속을 적용한다.",
+        "transcriptPanel.row.active/selected는 부모 패널의 그림자를 변경하지 말고, 행 자체의 배경/좌측 보더만 변경한다."
+      ],
+      "responsive": [
+        "≤768px: 우측 패널을 플레이어 하단에 스택하고 chip 영역은 가로 스크롤을 허용한다.",
+        "≤480px: 타임스탬프 pill 폭을 축소하고(패딩 -2px), 행 간격을 md(12px)에서 sm(8px)로 줄인다."
+      ],
+      "stateDependencies": [
+        "hover와 focus가 동시에 발생하면 focusRing을 우선 적용한다.",
+        "selected 상태는 active보다 우선하며, 둘이 겹치는 경우 selected 배경을 유지하고 active의 보더 강조만 적용한다."
+      ]
+    },
+    "visualEffects": {
+      "shadows": [
+        {"target": "panelContainers", "shadow": "0 2px 12px rgba(16,24,40,0.08)"},
+        {"target": "popover/menus", "shadow": "0 8px 24px rgba(16,24,40,0.12)"},
+        {"target": "scrubberKnob", "shadow": "0 2px 8px rgba(16,24,40,0.18)"}
+      ],
+      "radii": [
+        {"target": "panels", "value": "14px"},
+        {"target": "chips", "value": "999px"},
+        {"target": "rows", "value": "10px"},
+        {"target": "tooltips", "value": "8px"}
+      ],
+      "animations": [
+        {"trigger": "chip.hover", "properties": "background-color, border-color", "duration": "180ms", "easing": "cubic-bezier(0.4,0,0.2,1)"},
+        {"trigger": "row.expand", "properties": "max-height, opacity", "duration": "280ms", "easing": "cubic-bezier(0.4,0,0.2,1)"}
+      ],
+      "layering": [
+        {"playerScrubber": 20},
+        {"popovers": 30},
+        {"tooltips": 40},
+        {"modalOverlay": 50}
+      ]
+    },
+    "states": {
+      "matrix": {
+        "chip": {
+          "base": {"bg": "#F1F5F9", "text": "#0F172A", "border": "#E2E8F0"},
+          "hover": {"bg": "#EEF2F7", "border": "#CBD5E1"},
+          "selected": {"bg": "#DBEAFE", "text": "#1E3A8A", "border": "#93C5FD"},
+          "focus": {"ring": "0 0 0 3px rgba(147,197,253,0.9)"},
+          "disabled": {"bg": "#F8FAFC", "text": "#9CA3AF", "border": "#E5E7EB", "opacity": 0.6}
+        },
+        "transcriptRow": {
+          "base": {"bg": "#FFFFFF", "borderLeft": "0"},
+          "hover": {"bg": "#F8FAFF"},
+          "active": {"bg": "#EEF2FF", "borderLeft": "3px solid #6366F1"},
+          "selected": {"bg": "#E0E7FF", "borderLeft": "3px solid #6366F1"},
+          "focus": {"ring": "0 0 0 3px rgba(147,197,253,0.9)"},
+          "disabled": {"opacity": 0.6}
+        },
+        "chapterBar": {
+          "base": {"track": "#E5E7EB", "played": "#2563EB", "buffered": "#CBD5E1"},
+          "hover": {"scrubberScale": 1.05},
+          "active": {"scrubberScale": 1.1},
+          "focus": {"ring": "0 0 0 3px rgba(147,197,253,0.9)"}
+        },
+        "buttonPrimary": {
+          "base": {"bg": "#2563EB", "text": "#FFFFFF"},
+          "hover": {"bg": "#1D4ED8"},
+          "active": {"bg": "#1E40AF"},
+          "focus": {"ring": "0 0 0 3px rgba(147,197,253,0.9)"},
+          "disabled": {"bg": "#93C5FD", "text": "#FFFFFF"}
+        }
+      }
+    },
+    "accessibility": {
+      "contrast": [
+        {"pair": "text.primary on surface", "foreground": "#111827", "background": "#FFFFFF", "wcag": "AA/AAA OK"},
+        {"pair": "primary button text on primary bg", "foreground": "#FFFFFF", "background": "#2563EB", "wcag": "AA OK"},
+        {"pair": "timestamp on pill", "foreground": "#334155", "background": "#F1F5F9", "wcag": "AA OK"}
+      ],
+      "focus": {
+        "ring": "0 0 0 3px rgba(147,197,253,0.9)",
+        "keyboardNavigable": true,
+        "skipToContent": true
+      }
+    },
+    "replicationGuidelines": {
+      "selectors": [
+        {"target": "chapter bar markers", "selector": ".chapter-bar__marker"},
+        {"target": "transcript rows", "selector": ".transcript__row"},
+        {"target": "keyword chips", "selector": ".chips__item"},
+        {"target": "active row", "selector": ".transcript__row--active"}
+      ],
+      "boundaries": [
+        "패널 그림자는 panel 컨테이너에만 적용하고 행(row)에는 적용하지 않는다.",
+        "그라데이션은 페이지 배경에서만 사용하고 컴포넌트 표면에는 단색을 유지한다.",
+        "버튼 텍스트 색(#FFFFFF)은 일반 본문 타이포그래피에 사용하지 않는다."
+      ],
+      "transitions": [
+        "chip, row hover: background/border 180ms",
+        "row expand (disclosure): max-height/opacity 280ms"
+      ],
+      "qa": {
+        "avoid": [
+          "아이콘에 컨테이너 그라데이션 적용",
+          "버튼 텍스트 컬러를 일반 본문에 사용",
+          "패널 내부 자식에게 패널 그림자 재적용"
+        ],
+        "ensure": [
+          "동일 컴포넌트 패밀리(칩/배지/버튼)의 컬러 관계 일관",
+          "WCAG AA 대비 충족",
+          "selected/active/focus의 우선순위 규칙 준수"
+        ]
+      }
+    }
+  }
+}
