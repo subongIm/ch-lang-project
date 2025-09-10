@@ -14,6 +14,7 @@ interface PlayerPanelProps {
   videoId: string;
   startTime: number;
   endTime: number;
+  clipId?: string;
   onTimeUpdate?: (currentTime: number) => void;
 }
 
@@ -21,6 +22,7 @@ export const PlayerPanel: React.FC<PlayerPanelProps> = ({
   videoId,
   startTime,
   endTime,
+  clipId,
   onTimeUpdate,
 }) => {
   const iframeRef = useRef<HTMLDivElement>(null);
@@ -67,7 +69,8 @@ export const PlayerPanel: React.FC<PlayerPanelProps> = ({
       width: '100%',
       videoId,
       playerVars: {
-        // start와 end 파라미터 제거 (에러 원인일 수 있음)
+        start: Math.floor(startTime),
+        end: Math.floor(endTime),
         autoplay: 0,
         controls: 1,
         enablejsapi: 1,
@@ -103,6 +106,16 @@ export const PlayerPanel: React.FC<PlayerPanelProps> = ({
             if (playerRef.current && playerRef.current.seekTo) {
               playerRef.current.seekTo(startTime);
               setCurrentTime(0);
+            }
+            
+            // 시청 완료 상태 저장
+            if (clipId) {
+              const watchedClips = JSON.parse(localStorage.getItem('watchedClips') || '[]');
+              if (!watchedClips.includes(clipId)) {
+                watchedClips.push(clipId);
+                localStorage.setItem('watchedClips', JSON.stringify(watchedClips));
+                console.log('Marked clip as watched:', clipId);
+              }
             }
           }
         },

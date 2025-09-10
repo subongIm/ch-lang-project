@@ -43,14 +43,20 @@ export const KeywordChips: React.FC<KeywordChipsProps> = ({
           <h4 className="text-label font-medium text-text-primary">단어</h4>
           <div className="flex flex-wrap gap-2">
             {vocabs.map((vocab) => (
-              <Chip
-                key={vocab.id}
-                selected={selectedVocabIds.includes(vocab.id)}
-                onClick={() => handleVocabClick(vocab.id)}
-                className="animate-fade-in"
-              >
-                {vocab.term}
-              </Chip>
+              <div key={vocab.id} className="flex flex-col">
+                <Chip
+                  selected={selectedVocabIds.includes(vocab.id)}
+                  onClick={() => handleVocabClick(vocab.id)}
+                  className="animate-fade-in"
+                >
+                  {vocab.term}
+                </Chip>
+                {vocab.meaning && (
+                  <span className="text-caption text-text-secondary mt-1 text-center">
+                    {vocab.meaning}
+                  </span>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -62,14 +68,20 @@ export const KeywordChips: React.FC<KeywordChipsProps> = ({
           <h4 className="text-label font-medium text-text-primary">문법</h4>
           <div className="flex flex-wrap gap-2">
             {grammars.map((grammar) => (
-              <Chip
-                key={grammar.id}
-                selected={selectedGrammarIds.includes(grammar.id)}
-                onClick={() => handleGrammarClick(grammar.id)}
-                className="animate-fade-in"
-              >
-                {grammar.label}
-              </Chip>
+              <div key={grammar.id} className="flex flex-col">
+                <Chip
+                  selected={selectedGrammarIds.includes(grammar.id)}
+                  onClick={() => handleGrammarClick(grammar.id)}
+                  className="animate-fade-in"
+                >
+                  {grammar.label}
+                </Chip>
+                {grammar.meaning && (
+                  <span className="text-caption text-text-secondary mt-1 text-center">
+                    {grammar.meaning}
+                  </span>
+                )}
+              </div>
             ))}
           </div>
         </div>

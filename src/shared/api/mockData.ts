@@ -55,9 +55,11 @@ export interface Bookmark {
 
 export interface User {
   id: string;
-  role: 'learner' | 'editor' | 'admin';
-  name: string;
-  email?: string;
+  username: string;
+  email: string;
+  isAdmin: boolean;
+  createdAt: string;
+  joinDate: string;
 }
 
 export const mockData = {
@@ -1068,29 +1070,207 @@ export const mockData = {
   users: [
     {
       id: "u_001",
-      role: "learner" as const,
-      name: "춘식",
-      email: "chunsik@example.com"
+      username: "chunsik",
+      email: "chunsik@example.com",
+      isAdmin: false,
+      createdAt: "2024-01-01T00:00:00.000Z",
+      joinDate: "2024-01-01T00:00:00.000Z"
     },
     {
       id: "editor_01",
-      role: "editor" as const,
-      name: "에디터",
-      email: "editor@example.com"
+      username: "editor",
+      email: "editor@example.com",
+      isAdmin: false,
+      createdAt: "2024-01-01T00:00:00.000Z",
+      joinDate: "2024-01-01T00:00:00.000Z"
     },
     {
       id: "admin_01",
-      role: "admin" as const,
-      name: "관리자",
-      email: "admin@example.com"
+      username: "admin",
+      email: "admin@example.com",
+      isAdmin: true,
+      createdAt: "2024-01-01T00:00:00.000Z",
+      joinDate: "2024-01-01T00:00:00.000Z"
     }
   ] as User[]
 };
 
+// 관리자 데이터 로드 함수들
+const loadAdminVideos = (): any[] => {
+  if (typeof window === 'undefined') return [];
+  return JSON.parse(localStorage.getItem('adminVideos') || '[]');
+};
+
+const loadAdminScripts = (): any[] => {
+  if (typeof window === 'undefined') return [];
+  return JSON.parse(localStorage.getItem('adminScripts') || '[]');
+};
+
+// 관리자 데이터를 Clip 형태로 변환
+const convertAdminVideoToClip = (adminVideo: any): Clip => {
+  // 스크립트에서 타임라인 정보 가져오기
+  const adminScripts = loadAdminScripts();
+  const script = adminScripts.find(s => s.videoId === adminVideo.videoId);
+  
+  let startTime = 0;
+  let endTime = adminVideo.duration || 600;
+  
+  if (script && script.phrases && script.phrases.length > 0) {
+    // 스크립트의 첫 번째 문장 시작 시간
+    startTime = Math.min(...script.phrases.map((p: any) => p.tStart));
+    // 스크립트의 마지막 문장 종료 시간
+    endTime = Math.max(...script.phrases.map((p: any) => p.tEnd));
+  }
+  
+  return {
+    id: adminVideo.id,
+    title: adminVideo.title,
+    source: {
+      type: 'youtube',
+      videoId: adminVideo.videoId,
+      start: startTime,
+      end: endTime
+    },
+    tags: ['관리자 등록'],
+    createdBy: 'admin',
+    thumbnail: adminVideo.thumbnail,
+    duration: endTime - startTime
+  };
+};
+
+// 관리자 스크립트를 Phrase 형태로 변환
+const convertAdminScriptToPhrases = (adminScript: any): Phrase[] => {
+  // 클립의 시작 시간 찾기
+  const adminVideos = loadAdminVideos();
+  const video = adminVideos.find(v => v.videoId === adminScript.videoId);
+  const clip = video ? convertAdminVideoToClip(video) : null;
+  const clipStartTime = clip ? clip.source.start : 0;
+  
+  // 실제 클립 ID 사용 (video.id가 실제 클립 ID)
+  const actualClipId = video ? video.id : `admin_clip_${adminScript.videoId}`;
+  
+  return adminScript.phrases.map((phrase: any) => ({
+    ...phrase,
+    tStart: phrase.tStart - clipStartTime, // 상대 시간으로 변환
+    tEnd: phrase.tEnd - clipStartTime,     // 상대 시간으로 변환
+    clipId: actualClipId // 실제 클립 ID 사용
+  }));
+};
+
+// 삭제된 클립 ID들을 로드하는 함수
+const loadDeletedClips = (): string[] => {
+  if (typeof window === 'undefined') return [];
+  return JSON.parse(localStorage.getItem('deletedClips') || '[]').map((clip: any) => clip.id);
+};
+
 // Helper functions for data access
-export const getClips = () => mockData.clips;
-export const getClipById = (id: string) => mockData.clips.find(clip => clip.id === id);
-export const getPhrasesByClipId = (clipId: string) => mockData.phrases.filter(phrase => phrase.clipId === clipId);
+export const getClips = (): Clip[] => {
+  const mockClips = mockData.clips;
+  const adminVideos = loadAdminVideos();
+  const adminClips = adminVideos.map(convertAdminVideoToClip);
+  const deletedClipIds = loadDeletedClips();
+  
+  // 삭제된 클립들을 제외
+  const allClips = [...mockClips, ...adminClips];
+  return allClips.filter(clip => !deletedClipIds.includes(clip.id));
+};
+
+export const getClipById = (id: string): Clip | undefined => {
+  const allClips = getClips();
+  return allClips.find(clip => clip.id === id);
+};
+
+export const getPhrasesByClipId = (clipId: string): Phrase[] => {
+  // 먼저 mock 데이터에서 찾기
+  const mockPhrases = mockData.phrases.filter(phrase => phrase.clipId === clipId);
+  
+  // 관리자 데이터에서 찾기
+  const adminScripts = loadAdminScripts();
+  const adminPhrases: Phrase[] = [];
+  
+  // 관리자 비디오에서 해당 클립 ID 찾기
+  const adminVideos = loadAdminVideos();
+  const adminVideo = adminVideos.find(video => video.id === clipId);
+  
+  if (adminVideo) {
+    // 해당 비디오의 스크립트 찾기
+    const script = adminScripts.find(s => s.videoId === adminVideo.videoId);
+    if (script) {
+      adminPhrases.push(...convertAdminScriptToPhrases(script));
+    }
+  }
+  
+  console.log('getPhrasesByClipId:', {
+    clipId,
+    mockPhrasesCount: mockPhrases.length,
+    adminPhrasesCount: adminPhrases.length,
+    totalPhrases: mockPhrases.length + adminPhrases.length,
+    adminVideo: adminVideo ? adminVideo.title : 'not found'
+  });
+  
+  return [...mockPhrases, ...adminPhrases];
+};
+
+// 관리자 스크립트에서 키워드 가져오기
+export const getVocabsByClipId = (clipId: string): Vocab[] => {
+  // 먼저 mock 데이터에서 찾기
+  const mockVocabs = mockData.vocabs.filter(vocab => 
+    mockData.phrases.some(phrase => 
+      phrase.clipId === clipId && phrase.vocabRefs.includes(vocab.id)
+    )
+  );
+  
+  // 관리자 데이터에서 찾기
+  const adminScripts = loadAdminScripts();
+  const adminVideos = loadAdminVideos();
+  const adminVideo = adminVideos.find(video => video.id === clipId);
+  
+  let adminVocabs: Vocab[] = [];
+  if (adminVideo) {
+    const script = adminScripts.find(s => s.videoId === adminVideo.videoId);
+    if (script && script.vocabs) {
+      adminVocabs = script.vocabs.map((vocab: any) => ({
+        id: vocab.id,
+        term: vocab.term,
+        meaning: vocab.meaning,
+        pinyin: vocab.pinyin,
+        level: vocab.level || 'intermediate'
+      }));
+    }
+  }
+  
+  return [...mockVocabs, ...adminVocabs];
+};
+
+export const getGrammarsByClipId = (clipId: string): Grammar[] => {
+  // 먼저 mock 데이터에서 찾기
+  const mockGrammars = mockData.grammars.filter(grammar => 
+    mockData.phrases.some(phrase => 
+      phrase.clipId === clipId && phrase.grammarRefs.includes(grammar.id)
+    )
+  );
+  
+  // 관리자 데이터에서 찾기
+  const adminScripts = loadAdminScripts();
+  const adminVideos = loadAdminVideos();
+  const adminVideo = adminVideos.find(video => video.id === clipId);
+  
+  let adminGrammars: Grammar[] = [];
+  if (adminVideo) {
+    const script = adminScripts.find(s => s.videoId === adminVideo.videoId);
+    if (script && script.grammars) {
+      adminGrammars = script.grammars.map((grammar: any) => ({
+        id: grammar.id,
+        label: grammar.label,
+        meaning: grammar.meaning,
+        level: grammar.level || 'intermediate'
+      }));
+    }
+  }
+  
+  return [...mockGrammars, ...adminGrammars];
+};
+
 export const getVocabById = (id: string) => mockData.vocabs.find(vocab => vocab.id === id);
 export const getGrammarById = (id: string) => mockData.grammars.find(grammar => grammar.id === id);
 export const getBookmarksByUserId = (userId: string) => mockData.bookmarks.filter(bookmark => bookmark.userId === userId);

@@ -1,189 +1,146 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Panel } from '../../shared/ui/Panel';
-import { Button } from '../../shared/ui/Button';
-import { useUserStore } from '../../shared/stores/userStore';
-import { getClipById, getPhrasesByClipId, Bookmark } from '../../shared/api/mockData';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUserStore } from '@/shared/stores/userStore';
+import { Panel } from '@/shared/ui/Panel';
+import { Button } from '@/shared/ui/Button';
 
-export default function ProfilePage() {
-  const { currentUser, bookmarks, setCurrentUser } = useUserStore();
-  const [userBookmarks, setUserBookmarks] = useState<Array<Bookmark & { clipTitle: string; phraseText?: string }>>([]);
+const ProfilePage: React.FC = () => {
+  const router = useRouter();
+  const { user, logout, isAuthenticated } = useUserStore();
+  const [isLoading, setIsLoading] = useState(true);
+  const [displayUser, setDisplayUser] = useState<any>(null);
+  
+  // 로그인 상태를 더 안전하게 확인
+  const isLoggedIn = isAuthenticated || !!user;
+  
+  // 디버깅을 위한 로그
+  console.log('ProfilePage render:', { isAuthenticated, user, isLoggedIn });
 
-  // Load user bookmarks with additional data
   useEffect(() => {
-    if (!currentUser) return;
-
-    const bookmarkData = bookmarks
-      .filter(bookmark => bookmark.userId === currentUser.id)
-      .map(bookmark => {
-        const clip = getClipById(bookmark.clipId);
-        const phrases = getPhrasesByClipId(bookmark.clipId);
-        const phrase = phrases.find(p => p.id === bookmark.phraseId);
-        
-        return {
-          ...bookmark,
-          clipTitle: clip?.title || '알 수 없는 클립',
-          phraseText: phrase?.zh || undefined,
-        };
-      });
-
-    setUserBookmarks(bookmarkData);
-  }, [currentUser, bookmarks]);
-
-  const handleLogin = () => {
-    // Mock login - in real app, this would be proper authentication
-    setCurrentUser({
-      id: 'u_001',
-      role: 'learner',
-      name: '춘식',
-      email: 'chunsik@example.com'
-    });
-  };
+    // 로그인된 사용자 정보가 있으면 사용하고, 없으면 임의의 사용자 정보 생성
+    if (isLoggedIn && user) {
+      setDisplayUser(user);
+    } else {
+      // 임의의 사용자 정보 생성
+      const mockUser = {
+        id: 'mock_user_1',
+        username: 'demo_user',
+        email: 'demo@example.com',
+        isAdmin: false,
+        createdAt: new Date().toISOString(),
+        joinDate: new Date().toISOString()
+      };
+      setDisplayUser(mockUser);
+    }
+    setIsLoading(false);
+  }, [isLoggedIn, user]);
 
   const handleLogout = () => {
-    setCurrentUser(null);
+    if (isAuthenticated) {
+      logout();
+    }
+    router.push('/login');
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  if (!currentUser) {
+  if (isLoading) {
     return (
-      <div className="bg-gradient-to-b from-page-bg-from to-page-bg-to p-6">
-        <div className="max-w-2xl mx-auto">
-          <Panel className="text-center">
-            <div className="space-y-6">
-              <div className="text-6xl">👤</div>
-              <h1 className="text-h1 text-text-primary">로그인이 필요합니다</h1>
-              <p className="text-body text-text-secondary">
-                북마크와 학습 진도를 저장하려면 로그인하세요.
-              </p>
-              <Button onClick={handleLogin}>
-                로그인 (데모)
-              </Button>
-            </div>
-          </Panel>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-text-secondary">로딩 중...</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-b from-page-bg-from to-page-bg-to p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-h1 text-text-primary mb-2">프로필</h1>
-              <p className="text-body text-text-secondary">
-                안녕하세요, {currentUser.name}님!
-              </p>
-            </div>
-            <Button variant="secondary" onClick={handleLogout}>
-              로그아웃
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* User Info */}
-          <Panel title="사용자 정보">
-            <div className="space-y-3">
-              <div>
-                <label className="text-label font-medium text-text-primary">이름</label>
-                <p className="text-body text-text-secondary">{currentUser.name}</p>
-              </div>
-              <div>
-                <label className="text-label font-medium text-text-primary">이메일</label>
-                <p className="text-body text-text-secondary">{currentUser.email}</p>
-              </div>
-              <div>
-                <label className="text-label font-medium text-text-primary">역할</label>
-                <p className="text-body text-text-secondary">
-                  {currentUser.role === 'learner' ? '학습자' : 
-                   currentUser.role === 'editor' ? '편집자' : '관리자'}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-h1 font-bold text-text-primary mb-8">프로필</h1>
+          
+          <Panel>
+            <div className="space-y-6">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">👤</span>
+                </div>
+                <h2 className="text-h2 font-semibold text-text-primary">
+                  {isLoggedIn && user ? user.username : (displayUser?.username || '사용자')}
+                </h2>
+                <p className="text-text-secondary">
+                  {isLoggedIn && user ? (user.isAdmin ? '관리자' : '일반 사용자') : (displayUser?.isAdmin ? '관리자' : '일반 사용자')}
                 </p>
               </div>
-            </div>
-          </Panel>
 
-          {/* Learning Stats */}
-          <Panel title="학습 통계">
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-body text-text-primary">저장된 북마크</span>
-                <span className="text-body font-medium text-brand-primary">{userBookmarks.length}개</span>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-3 border-b border-border">
+                  <span className="text-text-secondary font-medium">사용자명</span>
+                  <span className="text-text-primary font-semibold">
+                    {isLoggedIn && user ? user.username : (displayUser?.username || 'demo_user')}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center py-3 border-b border-border">
+                  <span className="text-text-secondary font-medium">이메일</span>
+                  <span className="text-text-primary font-semibold">
+                    {isLoggedIn && user ? user.email : (displayUser?.email || 'demo@example.com')}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center py-3 border-b border-border">
+                  <span className="text-text-secondary font-medium">계정 유형</span>
+                  <span className="text-text-primary font-semibold">
+                    {isLoggedIn && user ? (user.isAdmin ? '관리자' : '일반 사용자') : (displayUser?.isAdmin ? '관리자' : '일반 사용자')}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center py-3 border-b border-border">
+                  <span className="text-text-secondary font-medium">가입일</span>
+                  <span className="text-text-primary font-semibold">
+                    {isLoggedIn && user ? 
+                      new Date(user.joinDate).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      }) : 
+                      (displayUser?.joinDate ? new Date(displayUser.joinDate).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      }) : new Date().toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      }))
+                    }
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-body text-text-primary">학습한 클립</span>
-                <span className="text-body font-medium text-brand-primary">
-                  {new Set(userBookmarks.map(b => b.clipId)).size}개
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-body text-text-primary">총 학습 시간</span>
-                <span className="text-body font-medium text-brand-primary">
-                  {Math.floor(userBookmarks.length * 5)}분 (추정)
-                </span>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  onClick={() => window.location.href = '/library'}
+                  variant="secondary"
+                  className="flex-1"
+                >
+                  라이브러리로 이동
+                </Button>
+                {isLoggedIn && (
+                  <Button
+                    onClick={handleLogout}
+                    variant="secondary"
+                    className="flex-1"
+                  >
+                    로그아웃
+                  </Button>
+                )}
               </div>
             </div>
-          </Panel>
-
-          {/* Bookmarks */}
-          <Panel title="북마크" subtitle={`${userBookmarks.length}개의 저장된 북마크`} className="lg:col-span-2">
-            {userBookmarks.length > 0 ? (
-              <div className="space-y-3">
-                {userBookmarks.map(bookmark => (
-                  <div key={bookmark.id} className="border border-border rounded-sm p-3 hover:bg-hover-bg transition-colors duration-base">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="text-body font-medium text-text-primary mb-1">
-                          {bookmark.clipTitle}
-                        </h4>
-                        {bookmark.phraseText && (
-                          <p className="text-body text-text-secondary mb-2">
-                            "{bookmark.phraseText}"
-                          </p>
-                        )}
-                        <div className="flex items-center space-x-4 text-label text-text-tertiary">
-                          <span>시간: {formatTime(bookmark.t)}</span>
-                          {bookmark.note && (
-                            <span>노트: {bookmark.note}</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="utility" 
-                          size="sm"
-                          onClick={() => window.location.href = `/study/${bookmark.clipId}?start=${Math.max(0, bookmark.t - 30)}&end=${bookmark.t + 30}`}
-                        >
-                          학습
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <div className="text-4xl mb-2">🔖</div>
-                <p className="text-body text-text-secondary">
-                  아직 저장된 북마크가 없습니다.
-                </p>
-                <p className="text-body text-text-tertiary mt-1">
-                  학습 중에 북마크를 저장해보세요!
-                </p>
-              </div>
-            )}
           </Panel>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ProfilePage;

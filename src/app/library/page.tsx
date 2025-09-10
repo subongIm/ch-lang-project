@@ -2,24 +2,80 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Panel } from '../../shared/ui/Panel';
-import { Button } from '../../shared/ui/Button';
-import { getClips, Clip } from '../../shared/api/mockData';
+import { Panel } from '@/shared/ui/Panel';
+import { Button } from '@/shared/ui/Button';
+import { getClips, Clip } from '@/shared/api/mockData';
 
 export default function LibraryPage() {
   const router = useRouter();
   const [clips, setClips] = useState<Clip[]>([]);
+  const [watchedClips, setWatchedClips] = useState<Set<string>>(new Set());
 
-  // Load clips
+  // Load clips and watched status
   useEffect(() => {
-    const clipsData = getClips();
-    setClips(clipsData);
+    const loadClips = () => {
+      try {
+        const clipsData = getClips();
+        console.log('LibraryPage: Loaded clips:', clipsData);
+        setClips(clipsData);
+      } catch (error) {
+        console.error('LibraryPage: Error loading clips:', error);
+        setClips([]);
+      }
+    };
+    
+    const loadWatchedStatus = () => {
+      try {
+        const watched = JSON.parse(localStorage.getItem('watchedClips') || '[]');
+        setWatchedClips(new Set(watched));
+      } catch (error) {
+        console.error('LibraryPage: Error loading watched status:', error);
+        setWatchedClips(new Set());
+      }
+    };
+    
+    loadClips();
+    loadWatchedStatus();
+    
+    // 페이지 포커스 시 데이터 새로고침 (관리자 페이지 변경사항 반영)
+    const handleFocus = () => {
+      loadClips();
+      loadWatchedStatus();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleStudyStart = (clipId: string) => {
+    try {
+      // 학습 시작 시 즉시 시청된 것으로 표시
+      const watchedClips = JSON.parse(localStorage.getItem('watchedClips') || '[]');
+      if (!watchedClips.includes(clipId)) {
+        watchedClips.push(clipId);
+        localStorage.setItem('watchedClips', JSON.stringify(watchedClips));
+        setWatchedClips(new Set(watchedClips));
+      }
+      
+      // 학습 페이지로 이동
+      const clip = clips.find(c => c.id === clipId);
+      if (clip) {
+        router.push(`/study/${clipId}?start=${clip.source.start}&end=${clip.source.end}`);
+      } else {
+        console.error('LibraryPage: Clip not found for ID:', clipId);
+      }
+    } catch (error) {
+      console.error('LibraryPage: Error in handleStudyStart:', error);
+    }
   };
 
   return (
@@ -74,20 +130,32 @@ export default function LibraryPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                <div className="flex items-center justify-between">
                   <Button 
-                    onClick={() => router.push(`/study/${clip.id}?start=${clip.source.start}&end=${clip.source.end}`)}
+                    onClick={() => handleStudyStart(clip.id)}
                     className="flex-1"
                   >
                     학습 시작
                   </Button>
-                  <Button 
-                    variant="secondary" 
-                    onClick={() => router.push(`/review/${clip.id}`)}
-                    className="flex-1"
-                  >
-                    복습
-                  </Button>
+                  
+                  {/* 시청 여부 표시 */}
+                  <div className="ml-3 flex items-center">
+                    {watchedClips.has(clip.id) ? (
+                      <div className="flex items-center space-x-1 text-green-700 bg-green-50 px-2 py-1 rounded-md">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-label font-medium">시청완료</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-1 text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-label">미시청</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </Panel>

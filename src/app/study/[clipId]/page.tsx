@@ -14,6 +14,8 @@ import { useUserStore } from '../../../shared/stores/userStore';
 import { 
   getClipById, 
   getPhrasesByClipId, 
+  getVocabsByClipId,
+  getGrammarsByClipId,
   getVocabById, 
   getGrammarById,
   Phrase,
@@ -41,25 +43,27 @@ export default function StudyPage() {
   useEffect(() => {
     if (!clipId) return;
 
+    console.log('StudyPage: Loading data for clipId:', clipId);
+    
     const clipData = getClipById(clipId);
-    if (!clipData) return;
+    if (!clipData) {
+      console.log('StudyPage: Clip not found for clipId:', clipId);
+      return;
+    }
 
+    console.log('StudyPage: Found clip:', clipData);
     setClip(clipData);
     
     const phrasesData = getPhrasesByClipId(clipId);
+    console.log('StudyPage: Found phrases:', phrasesData);
     setPhrases(phrasesData);
 
-    // Extract unique vocabs and grammars
-    const allVocabIds = new Set<string>();
-    const allGrammarIds = new Set<string>();
-    
-    phrasesData.forEach(phrase => {
-      phrase.vocabRefs.forEach(id => allVocabIds.add(id));
-      phrase.grammarRefs.forEach(id => allGrammarIds.add(id));
-    });
+    // Get vocabs and grammars for this clip
+    const vocabsData = getVocabsByClipId(clipId);
+    const grammarsData = getGrammarsByClipId(clipId);
 
-    const vocabsData = Array.from(allVocabIds).map(id => getVocabById(id)).filter(Boolean) as Vocab[];
-    const grammarsData = Array.from(allGrammarIds).map(id => getGrammarById(id)).filter(Boolean) as Grammar[];
+    console.log('StudyPage: Found vocabs:', vocabsData);
+    console.log('StudyPage: Found grammars:', grammarsData);
 
     setVocabs(vocabsData);
     setGrammars(grammarsData);
@@ -150,33 +154,8 @@ export default function StudyPage() {
               videoId={clip.source.videoId}
               startTime={startTime}
               endTime={endTime}
+              clipId={clip.id}
             />
-
-            {/* Tools under the player */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {/* Search */}
-              <Panel>
-                <Input
-                  placeholder="문장 검색..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  icon={
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  }
-                />
-              </Panel>
-
-              {/* Bookmark Button */}
-              {currentUser && (
-                <Panel>
-                  <Button onClick={handleBookmark} className="w-full">
-                    현재 문장 북마크
-                  </Button>
-                </Panel>
-              )}
-            </div>
           </div>
 
           {/* Right Column - Script */}
@@ -185,8 +164,6 @@ export default function StudyPage() {
               <div className="max-h-64 xl:max-h-96 overflow-y-auto">
                 <TranscriptList
                   phrases={filteredPhrases}
-                  vocabs={vocabs}
-                  grammars={grammars}
                   onPhraseClick={handlePhraseClick}
                 />
               </div>
